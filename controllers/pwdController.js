@@ -1,35 +1,33 @@
 const express = require("express");
-const router = express.Router();
+const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const User = require("../models/User");
+const router = express.Router();
 
-
-// Fonction pour envoyer un email de réinitialisation de mot de passe
 function sendResetPasswordEmail(user, token) {
     const transporter = nodemailer.createTransport({
-        service: "gmail",
+        service: "Gmail",
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD,
+            user: "piodlords03@gmail.com",
+            pass: "venm kcil svmm adzt",
         },
     });
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: "piodlords03@gmail.com",
         to: user.email,
         subject: "Réinitialisation de mot de passe",
         text: `Bonjour ${user.username},
 
-        Vous avez demandé une réinitialisation de mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :
+    Vous avez demandé une réinitialisation de mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :
+    
+    http://localhost:5173/reset-password/${token}
+    
+    Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail.
 
-        ${process.env.CLIENT_URL}/reset-password/${token}
-
-        Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail.
-
-        Cordialement,
-        Votre équipe`
+    Cordialement,
+    Sen~Leaning`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -44,8 +42,13 @@ function sendResetPasswordEmail(user, token) {
 // Contrôleur pour la demande de réinitialisation de mot de passe
 router.post("/forgotPassword", async (req, res) => {
     try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
+        const { email } = req.body.email;
+
+        if (typeof email !== 'string') {
+            return res.status(400).json({ error: "Format de l'email invalide !" });
+        }
+
+        const user = await User.findOne({ email: email });
 
         if (!user) {
             return res.status(404).json({ error: "Utilisateur non trouvé !" });
@@ -54,7 +57,9 @@ router.post("/forgotPassword", async (req, res) => {
         const token = jwt.sign(
             { userId: user._id },
             process.env.RESET_PASSWORD_SECRET,
-            { expiresIn: "1h" } // Durée de validité du token de réinitialisation
+            {
+                expiresIn: "1h",
+            }
         );
 
         sendResetPasswordEmail(user, token);
@@ -63,17 +68,19 @@ router.post("/forgotPassword", async (req, res) => {
             message: "Un e-mail de réinitialisation de mot de passe a été envoyé.",
         });
     } catch (error) {
-        console.error("Erreur lors de la demande de réinitialisation de mot de passe:", error);
+        console.error("Error during forgot password:", error);
         res.status(500).json({
-            error: "Une erreur s'est produite lors de la demande de réinitialisation de mot de passe.",
+            error:
+                "Une erreur s'est produite lors de la demande de réinitialisation de mot de passe.",
         });
     }
 });
 
-// Contrôleur pour la réinitialisation du mot de passe
-router.post("/resetPassword", async (req, res) => {
+// Contrôleur pour la réinitialisation de mot de passe
+router.post("/resetPassword/:token", async (req, res) => {
     try {
-        const { token, password } = req.body;
+        const { token } = req.params;
+        const { password } = req.body;
         const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET);
         const user = await User.findById(decoded.userId);
 
@@ -87,9 +94,10 @@ router.post("/resetPassword", async (req, res) => {
 
         res.status(200).json({ message: "Mot de passe réinitialisé avec succès." });
     } catch (error) {
-        console.error("Erreur lors de la réinitialisation du mot de passe:", error);
+        console.error("Error during reset password:", error);
         res.status(500).json({
-            error: "Une erreur s'est produite lors de la réinitialisation du mot de passe.",
+            error:
+                "Une erreur s'est produite lors de la réinitialisation du mot de passe.",
         });
     }
 });

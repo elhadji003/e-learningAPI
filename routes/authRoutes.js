@@ -25,5 +25,4 @@ router.put("/update/:id", verifyToken, updateUser);
 // Routes protégées par l'authentification et nécessitant un rôle admin
 router.get("/users/:id", verifyToken, isAdmin, getUserById);
 router.delete("/delete/:id", verifyToken, isAdmin, deleteUser);
-
 module.exports = router;

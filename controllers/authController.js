@@ -5,8 +5,12 @@ const bcrypt = require("bcryptjs");
 const register = async (req, res) => {
   const { username, email, level, number, password, role } = req.body;
 
+  console.log('Received data:', { username, email, level, number, password, role });
+
   try {
     const userExists = await User.findOne({ email });
+    console.log('User exists:', userExists);
+
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -22,6 +26,8 @@ const register = async (req, res) => {
       password: hashedPassword,
       role,
     });
+
+    console.log('User created:', user);
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -41,9 +47,11 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Error:', error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const login = async (req, res) => {
   const { email, password } = req.body;
