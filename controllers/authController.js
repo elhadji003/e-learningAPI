@@ -1,11 +1,13 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { sendAccountDeletionEmail } = require('../config/mailer');
+
 
 const register = async (req, res) => {
   const { username, email, level, number, password, address, ville, code_postal, pays, role } = req.body;
 
-  console.log('Received data:', { username, email, level, number, password, address, ville, code_postal, pays, role });
+  // console.log('Received data:', { username, email, level, number, password, address, ville, code_postal, pays, role });
 
   try {
     const userExists = await User.findOne({ email });
@@ -112,6 +114,24 @@ const getMe = async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+const deleteMeAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).send('User not found');
+
+    // Supprimer l'utilisateur
+    await User.findByIdAndDelete(req.user.id);
+
+    // Envoyer un email de confirmation
+    await sendAccountDeletionEmail(user.email, user.username);
+
+    res.status(200).send('Account deleted');
+  } catch (error) {
+    res.status(500).send('Server error');
   }
 };
 
@@ -241,6 +261,7 @@ module.exports = {
   register,
   login,
   getMe,
+  deleteMeAccount,
   getUserById,
   getAllUsers,
   updateUser,

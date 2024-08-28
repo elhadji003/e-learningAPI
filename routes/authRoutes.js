@@ -10,6 +10,7 @@ const {
   updateUser,
   refreshToken,
   updatePassword,
+  deleteMeAccount,
 } = require("../controllers/authController");
 const { verifyToken, isAdmin } = require("../middlewares/authMidlleware");
 
@@ -20,6 +21,7 @@ router.post("/refresh-token", refreshToken);  // Route pour rafraîchir le token
 
 // Routes protégées par l'authentification
 router.get("/me", verifyToken, getMe);
+router.delete("/deleteMeAccount", verifyToken, deleteMeAccount);
 router.get("/users", getAllUsers);
 router.put("/update/:id", updateUser);
 router.put('/updatePwd', verifyToken, updatePassword);
