@@ -22,7 +22,7 @@ function sendResetPasswordEmail(user, token) {
 
     Vous avez demandé une réinitialisation de mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :
     
-    http://localhost:5173/reset-password/${token}
+    https://e-learning-ten-steel.vercel.app/reset-password/${token}
     
     Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail.
 
