@@ -6,6 +6,7 @@ const uplaodImg = require("./controllers/imageController")
 const password = require("./controllers/pwdController")
 const authRoutes = require("./routes/authRoutes");
 const contactMe = require("./routes/contactMeRoute")
+const courseRoutes = require('./routes/courseRoutes');
 const cors = require("cors");
 
 dotenv.config();
@@ -18,8 +19,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api", authRoutes);
-app.use("/api", contactMe)
-app.use("/api/password", password)
+app.use("/api", contactMe);
+app.use("/api/courses", courseRoutes);
+app.use("/api/password", password);
 app.use("/api/storage", uplaodImg);
 
 const path = require("path");

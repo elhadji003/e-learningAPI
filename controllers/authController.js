@@ -119,21 +119,20 @@ const getMe = async (req, res) => {
 
 const deleteMeAccount = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const userId = req.user.id; // Id de l'utilisateur connecté à partir du token JWT
+    const user = await User.findByIdAndDelete(userId); // Suppression de l'utilisateur de la base de données
 
-    if (!user) return res.status(404).send('User not found');
+    if (user) {
+      await sendAccountDeletionEmail(user.email, user.username); // Envoyer un e-mail de confirmation
+    }
 
-    // Supprimer l'utilisateur
-    await User.findByIdAndDelete(req.user.id);
-
-    // Envoyer un email de confirmation
-    await sendAccountDeletionEmail(user.email, user.username);
-
-    res.status(200).send('Account deleted');
+    res.status(200).json({ message: 'Compte supprimé avec succès' });
   } catch (error) {
-    res.status(500).send('Server error');
+    console.error('Erreur lors de la suppression du compte:', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression du compte' });
   }
 };
+
 
 const getUserById = async (req, res) => {
   const userId = req.params.id;
